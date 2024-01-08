@@ -402,6 +402,7 @@ var collations = []*Collation{
 	{246, "utf8mb4", "utf8mb4_unicode_520_ci", false},
 	{247, "utf8mb4", "utf8mb4_vietnamese_ci", false},
 	{255, "utf8mb4", "utf8mb4_0900_ai_ci", false},
+	{256, "utf8mb3", "utf8mb3_general_ci", false},
 }
 
 // init method always puts to the end of file.
