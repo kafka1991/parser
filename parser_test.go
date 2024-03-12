@@ -5172,3 +5172,32 @@ func (s *testParserSuite) TestSpatialIndex(c *C) {
 	}
 	s.RunTest(c, table)
 }
+
+type CreateTableStatement struct {
+	tp []*ast.CreateTableStmt
+}
+
+func (v *CreateTableStatement) Enter(in ast.Node) (ast.Node, bool) {
+	if name, ok := in.(*ast.CreateTableStmt); ok {
+		v.tp = append(v.tp, name)
+	}
+	return in, false
+}
+
+func (v *CreateTableStatement) Leave(in ast.Node) (ast.Node, bool) {
+	return in, true
+}
+
+func TestCreateTableStatement(t *testing.T) {
+	sql := "create table t1 (id int ) start transaction"
+	p := parser.New()
+
+	st, err := p.ParseOneStmt(sql, "", "")
+	if err != nil {
+		fmt.Println(err)
+		return
+	}
+
+	v := &CreateTableStatement{}
+	st.Accept(v)
+}

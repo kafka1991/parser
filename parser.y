@@ -9399,6 +9399,24 @@ TableElementListOpt:
 			Constraints: constraints,
 		}
 	}
+|	'(' TableElementList ')' "START" "TRANSACTION"
+	{
+		tes := $2.([]interface{})
+				var columnDefs []*ast.ColumnDef
+				var constraints []*ast.Constraint
+				for _, te := range tes {
+					switch te := te.(type) {
+					case *ast.ColumnDef:
+						columnDefs = append(columnDefs, te)
+					case *ast.Constraint:
+						constraints = append(constraints, te)
+					}
+				}
+				$$ = &ast.CreateTableStmt{
+					Cols:        columnDefs,
+					Constraints: constraints,
+				}
+	}
 
 TableOption:
 	PartDefOption
