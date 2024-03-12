@@ -5172,3 +5172,32 @@ func (s *testParserSuite) TestSpatialIndex(c *C) {
 	}
 	s.RunTest(c, table)
 }
+
+type CreateTableStatement struct {
+	tp []*ast.CreateTableStmt
+}
+
+func (v *CreateTableStatement) Enter(in ast.Node) (ast.Node, bool) {
+	if name, ok := in.(*ast.CreateTableStmt); ok {
+		v.tp = append(v.tp, name)
+	}
+	return in, false
+}
+
+func (v *CreateTableStatement) Leave(in ast.Node) (ast.Node, bool) {
+	return in, true
+}
+
+func TestCreateTableStatement(t *testing.T) {
+	sql1 := "CREATE TABLE `sku_levelprice_20240307_15_59_05` (\n  `Id` bigint unsigned NOT NULL AUTO_INCREMENT COMMENT '自增ID',\n  `CorpId` bigint NOT NULL DEFAULT '0' COMMENT '指掌天下账号标识',\n  `SpuId` bigint unsigned NOT NULL DEFAULT '0' COMMENT '商品SPUID',\n  `SkuId` bigint unsigned NOT NULL DEFAULT '0' COMMENT '商品SKUID',\n  `LevelId` bigint unsigned NOT NULL DEFAULT '0' COMMENT '价格级别ID',\n  `UnitId` bigint unsigned NOT NULL DEFAULT '0' COMMENT '商品包装单位ID',\n  `Discount` decimal(19,8) NOT NULL DEFAULT '100.00000000' COMMENT '折扣',\n  `Price` bigint NOT NULL DEFAULT '0' COMMENT '单价',\n  `Type` tinyint NOT NULL DEFAULT '0' COMMENT '价格类型（0:默认订货价，1：级别价,2：零售价）',\n  `BusinessId` bigint unsigned NOT NULL DEFAULT '0' COMMENT '业务主键',\n  `CustomerAmount` int unsigned NOT NULL DEFAULT '0' COMMENT '客户数量',\n  `DataCreateTime` bigint NOT NULL DEFAULT '0' COMMENT '创建时间戳',\n  `DataUpdateTime` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '最后修改时间戳',\n  `DataStatus` tinyint NOT NULL DEFAULT '1' COMMENT '数据状态（0：已删除，1：正常）',\n  PRIMARY KEY (`Id`) USING BTREE,\n  UNIQUE KEY `index_03` (`BusinessId`) USING BTREE,\n  KEY `index_02` (`SpuId`) USING BTREE,\n  KEY `unique_index` (`SkuId`,`LevelId`,`UnitId`) USING BTREE,\n  KEY `index_06` (`CorpId`,`LevelId`),\n  KEY `DataUpdateTime` (`DataUpdateTime`),\n  KEY `index_05` (`CorpId`,`LevelId`,`DataStatus`,`SpuId`,`Discount`)\n) ENGINE=InnoDB AUTO_INCREMENT=5927 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci ROW_FORMAT=DYNAMIC COMMENT='商品级别价' start TRANSACTION"
+	p := parser.New()
+
+	st, err := p.ParseOneStmt(sql1, "", "")
+	if err != nil {
+		fmt.Println(err)
+		return
+	}
+
+	v := &CreateTableStatement{}
+	st.Accept(v)
+}
